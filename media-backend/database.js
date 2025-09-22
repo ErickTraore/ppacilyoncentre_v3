@@ -1,8 +1,10 @@
+// File: media-backend/database.js
+
 const { Sequelize } = require('sequelize');
-const config = require('./config/config.json');
+require('dotenv').config();
 
 const env = process.env.NODE_ENV || 'development';
-const dbConfig = config[env];
+const dbConfig = require('./config/config.js')[env];
 
 const sequelize = new Sequelize(
   dbConfig.database,
@@ -11,6 +13,7 @@ const sequelize = new Sequelize(
   {
     host: dbConfig.host,
     dialect: dbConfig.dialect,
+    logging: false, // optionnel : désactive les logs SQL
   }
 );
 

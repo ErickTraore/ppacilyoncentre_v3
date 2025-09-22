@@ -1,3 +1,5 @@
+// File: media-backend/models/media.js
+
 const { Model, DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
@@ -5,12 +7,11 @@ module.exports = (sequelize) => {
 
     Media.init({
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        messageId: { type: DataTypes.INTEGER, allowNull: true },
+        messageId: { type: DataTypes.INTEGER, allowNull: false },
         filename: { type: DataTypes.STRING, allowNull: false },
         path: { type: DataTypes.STRING, allowNull: false },
         type: { type: DataTypes.STRING, allowNull: false },
-        createdAt: { type: DataTypes.DATE, allowNull: true },
-        updatedAt: { type: DataTypes.DATE, allowNull: false }
+      
     }, {
         sequelize,
         modelName: 'Media',

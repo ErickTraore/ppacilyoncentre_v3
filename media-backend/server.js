@@ -27,11 +27,10 @@ app.use(cors({
 // Synchroniser la base de données et démarrer le serveur
 sequelize.sync({ force: false }).then(() => {
   app.listen(3001, () => {
-    console.log("✅ Serveur Express actif et fonctionnel !");
-    console.log('Serveur démarré sur le port 3001');
+    console.log('Serveur MEDIA_BACKEND démarré sur le port 3001');
   });
 }).catch(err => {
-  console.error('Erreur de connexion à la base de données:', err);
+  console.error('Erreur de connexion de MEDIA_BACKEND à la base de données:', err);
 });
 
 app.use('/api/', apiRouter);
