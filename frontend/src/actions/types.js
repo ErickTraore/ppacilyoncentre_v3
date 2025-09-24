@@ -1,0 +1,3 @@
+export const FETCH_MESSAGES = 'FETCH_MESSAGES';
+export const ADD_MESSAGE = 'ADD_MESSAGE';
+export const FETCH_MEDIAS = 'FETCH_MEDIAS';
