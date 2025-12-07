@@ -36,7 +36,7 @@ const FormArticlePhoto = () => {
     formData.append('messageId', messageId);
 
     try {
-      const response = await fetch(`${MEDIA_API}/api/uploadImage`, {
+      const response = await fetch(`${MEDIA_API}/api/uploadImage/`, {
         method: 'POST',
         body: formData,
       });

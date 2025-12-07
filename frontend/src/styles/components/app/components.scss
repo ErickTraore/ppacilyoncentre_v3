@@ -9,90 +9,114 @@ body {
 
 .App {
   width: 100%;
-  height: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+
   &__header {
-    width: auto;
+    width: 100%;
     height: 100%;
     display: flex;
     flex-direction: row;
-    align-items: center;
-    background-color: rgb(0, 0, 139);
-    justify-content: center;
-    padding: 10px;
+    align-items: stretch;
+    justify-content: space-between; // ✅ Ajouté
+    padding: 4px;
+    background-color: rgb(125, 154, 236);
+    border: solid 1px darkblue;
+    border-radius: 10px;
+    ;
 
     &__logo {
-      width: 20%;
-      height: 100%;
+      width: 15%;
+      height: auto;
       display: flex;
-      justify-content: center;
       align-items: center;
 
       &__img {
-        width: 50%;
+        width: 100%;
         height: 100%;
-
         display: flex;
-
-        border: solid 3px white;
         border-radius: 10px;
       }
     }
 
     &__panneau {
       width: 75%;
-      height: 100%;
-
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      &__img {
-        width: 80%;
-        height: auto;
-        border: solid 3px white;
-        border-radius: 10px;
-      }
-    }
-
-    &__actions {
-      width: 10%;
       height: auto;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
 
+      &__text-1 {
+        width: 100%;
+        height: 50%;
+        margin: 0px 0px;
+        font-size: 0.9rem;
+        color: white;
+        text-align: center;
+        font-weight: bold;
+
+      }
+
+      &__text-2 {
+        width: 100%;
+        height: 50%;
+        margin: 0px 0px;
+        font-size: 0.6rem;
+        color: white;
+        text-align: center;
+        font-weight: bold;
+
+      }
+    }
+
+    &__actions {
+      width: 10%;
+      height: auto; // ✅ s'étend sur toute la hauteur du header
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between; // ✅ espace maximal entre les enfants
+      align-items: center;
       &__buttons {
         width: 100%;
-        height: auto;
-        align-self: flex-start;
+        height: 40%;
         display: flex;
         justify-content: center;
         align-items: center;
-
-        .logout-button {
+        &__logout {
           width: 100%;
-          height: auto;
-          font-size: clamp(16px, 4vw, 40px);
+          height: 100%;
+          display: flex;
           color: white;
           cursor: pointer;
-          background-color: darkblue;
-          border: solid 1px darkblue;
+          background-color: rgb(125, 154, 236);
+          border: none;
+          &__fa {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4vw;
+            font-weight: bold;
+            color: white;
+        }
         }
       }
 
       &__hamburger {
         width: 100%;
-        height: auto;
-        align-self: flex-end;
+        height:30%;
         display: flex;
-        justify-content: center;
+        justify-content: flex-end;
         align-items: center;
 
-        .hamburger-icon {
+        &__icon {
           font-size: clamp(14px, 4vw, 40px);
-          width: auto;
+          width: 100%;
           height: auto;
+          display: flex;
           cursor: pointer;
           border: none;
           display: none;
@@ -101,19 +125,15 @@ body {
           color: darkblue;
         }
 
-        .hamburger-icon {
+        &__icon {
           display: block;
         }
       }
-
-
 
     }
 
   }
 }
-
-
 
 .menu {
   display: none;
@@ -218,6 +238,69 @@ body {
   padding: 10px;
 }
 
-/* Media Query pour les écrans de taille inférieure à une tablette */
-/* Media Query pour les écrans de taille inférieure à une tablette */
-@media (max-width: 1440px) {}
+/* 📱 Mobile S: 376px – 425px */
+
+@media screen and (min-width: 375px) and (max-width: 425px) {
+  .App__header__panneau__text-1 {
+    font-size: 1.2rem;
+  }
+
+  .App__header__panneau__text-2 {
+    font-size: 0.7rem;
+  }
+}
+
+/* 📱 Mobile M: 426px – 768px */
+@media screen and (min-width: 426px) and (max-width: 600px) {
+  .App__header__panneau__text-1 {
+    font-size: 1.4rem;
+  }
+
+  .App__header__panneau__text-2 {
+    font-size: 0.8rem;
+  }
+}
+
+/* 📱 Mobile M: 426px – 768px */
+@media screen and (min-width: 601px) and (max-width: 767px) {
+  .App__header__panneau__text-1 {
+    font-size: 1.3rem;
+  }
+
+  .App__header__panneau__text-2 {
+    font-size: 1rem;
+  }
+}
+
+/* 💻 Tablet: 769px – 1024px */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+.App__header__panneau__text-1 {
+    font-size: 2.5rem;
+  }
+
+  .App__header__panneau__text-2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* 🖥️ Desktop: 1024px – 1440px */
+@media screen and (min-width: 1024px) and (max-width: 1440px) {
+.App__header__panneau__text-1 {
+    font-size: 3.5rem;
+  }
+
+  .App__header__panneau__text-2 {
+    font-size: 2.5rem;
+  }
+}
+
+/* 🖥️ Large Desktop: >1440px */
+@media screen and (min-width: 1441px) {
+  .App__header__panneau__text-1 {
+    font-size: 5rem;
+  }
+
+  .App__header__panneau__text-2 {
+    font-size: 3rem;
+  }
+}

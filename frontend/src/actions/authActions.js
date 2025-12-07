@@ -19,9 +19,7 @@ export const registerFail = (error) => ({
 export const registerUser = (userData) => async (dispatch) => {
   dispatch(registerRequest());
   try {
-    console.log("📤 Données reçues :", userData);
-
-    // Simuler une requête API
+    console.log("📤 Données reçues (frontend) :", userData);
     const response = await fetch(`${USER_API}/api/users/register`, {
       method: 'POST',
       headers: {
@@ -32,15 +30,16 @@ export const registerUser = (userData) => async (dispatch) => {
     const data = await response.json();
     dispatch(registerSuccess(data));
     if (data.redirectUrl) {
+      console.log("🔀 Redirection demandée vers :", data.redirectUrl);
       window.location.href = data.redirectUrl;
       window.location.reload();
     }
 
-  } 
-  catch (error) {
+  } catch (error) {
     dispatch(registerFail(error.message));
   }
 };
+
 
 export const loginUser = (token) => (dispatch) => {
   dispatch({

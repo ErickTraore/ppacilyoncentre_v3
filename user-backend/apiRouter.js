@@ -20,8 +20,8 @@ exports.router = (function () {
 
     apiRouter.route('/users/register/').post(usersCtrl.register);
     apiRouter.route('/users/login/').post(usersCtrl.login);
-    apiRouter.route('/users/me/').get(authMiddleware, usersCtrl.getUserProfile);
     apiRouter.route('/users/all/').get(authMiddleware, isAdminMiddleware, usersCtrl.getUserAll);
+    apiRouter.route('/users/me/').get(authMiddleware, usersCtrl.getUserProfile);
     apiRouter.route('/users/me/').put(authMiddleware, usersCtrl.updateUserProfile);
     apiRouter.route('/users/refresh-token/').post(usersCtrl.refreshToken);
     apiRouter.route('/users/extend-session').post(refreshAuthMiddleware, usersCtrl.extendSession);

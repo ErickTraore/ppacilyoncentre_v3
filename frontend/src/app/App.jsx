@@ -87,7 +87,7 @@ function App() {
 
   const menuItems = [
     { key: 'home', label: 'Home' },
-    ...(isAdmin ? [{ key: 'messages', label: 'Admin-article' }] : []),
+    // ...(isAdmin ? [{ key: 'messages', label: 'Admin-article' }] : []),
     ...(isAdmin ? [{ key: 'presse', label: 'Admin-presse' }] : []),
     { key: 'zoompage', label: 'Zoompage' },
     { key: 'contact', label: 'Contact' },
@@ -103,14 +103,19 @@ function App() {
         </div>
 
         <div className="App__header__panneau">
-          <img src={panneau} alt="panneau" className="App__header__panneau__img" />
+          <p className="App__header__panneau__text-1">
+            Parti des Peuples Africains
+          </p>
+          <p className="App__header__panneau__text-2">
+            Conseil Politique Permanent Europe
+          </p>
         </div>
 
         <div className="App__header__actions">
           <div className="App__header__actions__buttons">
             {isAuthenticated && (
-              <button onClick={() => handleLogout(dispatch)} className="logout-button">
-                <i className="fas fa-power-off"></i>
+              <button onClick={() => handleLogout(dispatch)} className="App__header__actions__buttons__logout">
+                <i className="App__header__actions__buttons__logout__fa fas fa-power-off"></i>
               </button>
             )}
           </div>

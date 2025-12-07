@@ -5,10 +5,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchMessages } from '../../actions/messageActions'; 
 import '../messagelist/MessageList.css';
 
-const USER_API = process.env.REACT_APP_USER_API;
 const MEDIA_API = process.env.REACT_APP_MEDIA_API;
 
-const MEDIA_BACKEND_URL =`${MEDIA_API}/api/getMedia`;
+
+
+const MEDIA_BACKEND_URL =`${MEDIA_API}/getMedia`;
 
 const getMessageViewType = (message) => {
   const hasImage = Array.isArray(message.media) && message.media.some((m) => 

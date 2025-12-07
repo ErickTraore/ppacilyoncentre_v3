@@ -2,7 +2,7 @@ import React from 'react';
 
 const HamburgerIcon = ({ isOpen, toggleMenu }) => {
   return (
-    <button className="hamburger-icon" onClick={toggleMenu}>
+    <button className="App__header__actions__hamburger__icon" onClick={toggleMenu}>
       {isOpen ? '✖' : '☰'}
     </button>
   );

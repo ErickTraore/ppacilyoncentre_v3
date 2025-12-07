@@ -1,4 +1,4 @@
-// File: frontend/src/components/profilepage/ProfilePage.jsx
+// File: ppacilyoncentre/frontend/src/components/profilepage/ProfilePage.jsx
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -91,8 +91,8 @@ const ProfilePage = () => {
     console.log('📦 FormData préparé avec champ "image"');
 
     try {
-      console.log('🚀 Envoi vers :', `${MEDIA_API}/api/uploadImageProfile`);
-      const response = await fetch(`${MEDIA_API}/api/uploadImageProfile`, {
+      console.log('🚀 Envoi vers :', `${MEDIA_API}/uploadImageProfile`);
+      const response = await fetch(`${MEDIA_API}/uploadImageProfile`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -172,14 +172,10 @@ const ProfilePage = () => {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
             {safeSlots.map((media) => (
               <div key={media.id} style={{ border: '1px solid #ccc', padding: '1rem' }}>
-                <img
-                  src={
-                    media.url
-                      ? `${MEDIA_API}${media.url}`
-                      : `${MEDIA_API}${media.path}`
-                  }
-                  alt="Image"
-                  style={{ width: '150px', height: 'auto', borderRadius: '4px' }}
+                  <img
+                    src={`https://ppacilyoncentre.com${media.path}`}
+                    alt="profileImage"
+                    style={{ width: '150px', height: 'auto', borderRadius: '4px' }}
                 />
 
                 <div style={{ marginTop: '1rem' }}>

@@ -42,11 +42,8 @@ const Register = () => {
       setPasswordError('Le mot de passe doit contenir entre 4 et 20 caractères et inclure au moins un chiffre');
       return;
     }
-
     dispatch(registerUser({ email, password }));
-
   };
-
   return (
     <form onSubmit={handleSubmit} className="login-form">
       {/* Champ Email */}

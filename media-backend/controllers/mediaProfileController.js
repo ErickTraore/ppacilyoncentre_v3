@@ -1,4 +1,4 @@
-// File: media-backend/controllers/mediaProfileController.js
+// File:ppacilyoncentre/media-backend/controllers/mediaProfileController.js
 
 const { MediaProfile } = require('../models'); // Sequelize ou autre ORM
 

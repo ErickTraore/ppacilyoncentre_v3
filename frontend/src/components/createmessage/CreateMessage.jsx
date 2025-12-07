@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchMessages } from '../../actions/messageActions';
 
+const USER_API = process.env.REACT_APP_USER_API;
+const MEDIA_API = process.env.REACT_APP_MEDIA_API;
+
 const CreateMessage = () => {
   const [newMessage, setNewMessage] = useState({
     tittle: '',
@@ -40,7 +43,7 @@ const CreateMessage = () => {
     formData.append(endpoint, file);
     formData.append('messageId', messageId);
 
-    await fetch(`https://ppacilyoncentre.com/media/api/upload${endpoint.charAt(0).toUpperCase() + endpoint.slice(1)}`, {
+    await fetch(`${ MEDIA_API}/media/api/upload${endpoint.charAt(0).toUpperCase() + endpoint.slice(1)}`, {
       method: 'POST',
       body: formData,
     });
@@ -55,7 +58,7 @@ const CreateMessage = () => {
     }
 
     try {
-      const response = await fetch('https://ppacilyoncentre.com/api/users/messages/new', {
+      const response = await fetch(`${USER_API}api/users/messages/new`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,

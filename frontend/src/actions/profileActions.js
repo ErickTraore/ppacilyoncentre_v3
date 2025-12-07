@@ -68,7 +68,10 @@ export const createFullProfile = ({ profileInfoCreate = {}, profileMediaCreate =
     try {
       const response = await fetch(`${USER_API}/api/infoProfile/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(profileInfoCreate)
       });
       const data = await response.json();
@@ -82,7 +85,7 @@ export const createFullProfile = ({ profileInfoCreate = {}, profileMediaCreate =
         for (const media of profileMediaCreate) {
           dispatch({ type: CREATE_PROFILEMEDIA_REQUEST });
           try {
-            const mediaResponse = await fetch(`${MEDIA_API}/api/mediaProfile/`, {
+            const mediaResponse = await fetch(`${MEDIA_API}/mediaProfile/`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ ...media, profileId })
@@ -145,7 +148,7 @@ export const updateProfileMedia = (mediaId, payload) => async (dispatch) => {
     return;
   }
 
-  const url = `${MEDIA_API}/api/mediaProfile/${mediaId}`;
+  const url = `${MEDIA_API}/mediaProfile/${mediaId}/`;
   console.log('🚀 Requête PUT vers :', url);
 
   try {
@@ -186,7 +189,7 @@ export const fetchProfileMedia = (profileId) => async (dispatch) => {
   }
 
   try {
-    const response = await fetch(`${MEDIA_API}/api/mediaProfile/${profileId}`, {
+    const response = await fetch(`${MEDIA_API}/mediaProfile/${profileId}/`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -194,10 +197,22 @@ export const fetchProfileMedia = (profileId) => async (dispatch) => {
       }
     });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Erreur récupération médias');
+    // ⚠️ Sécuriser le parsing JSON
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
 
-    dispatch({ type: FETCH_PROFILEMEDIA_SUCCESS, payload: data });
+    if (!response.ok) {
+      const errorMsg = (data && (data.error || data.message || data.detail)) 
+        || `Erreur récupération médias (code ${response.status})`;
+      throw new Error(errorMsg);
+    }
+
+    // ⚠️ Si pas de médias, renvoyer tableau vide plutôt qu'une erreur
+    dispatch({ type: FETCH_PROFILEMEDIA_SUCCESS, payload: data || [] });
   } catch (error) {
     dispatch({ type: FETCH_PROFILEMEDIA_FAIL, payload: error.message });
   }

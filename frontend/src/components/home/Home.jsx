@@ -9,11 +9,7 @@ const Home = () => {
 
 
   return (
-    <div>
-      <div className='home'>
-        <h3>Parti des Peuples Africains - Côte d'Ivoire</h3>
-      </div>
-
+    <div> 
       <MessageList />
     </div>
   );

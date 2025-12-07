@@ -82,7 +82,7 @@ Pour pouvoir démarrer le logitiel frontend3, il est impératif d'exécuter cett
 MYSQL
 /Applications/MAMP/Library/bin/mysql80/bin/mysql -u root -p
 @Erick2691
-show database;
+show databases;
 
 USE database_development;
 show tables;
@@ -111,11 +111,18 @@ nodemon
 Avertissements ESLint
 Au lieu de : <p>🎉 Bienvenue !</p>, faire : <p><span role="img" aria-label="fête">🎉</span> Bienvenue !</p>
 
+---------------------------------
+pm2 restart ecosystem.config.js
+------------------------
+
+cp -r build/* /var/www/ppacilyoncentre/frontend/
+
+
 ---------------------------------------------------------
 
-sudo env PATH=$PATH:/Users/traoredaouda/.nvm/versions/node/v20.19.5/bin /Users/traoredaouda/.nvm/versions/node/v20.19.5/lib/node_modules/pm2/bin/pm2 startup launchd -u traoredaouda --hp /Users/traoredaouda
-
-
-
+CREATE USER 'ppaci'@'127.0.0.1' IDENTIFIED BY '@Ppacilyoncentre2691';
+GRANT ALL PRIVILEGES ON user_%_ppacilyoncentre_v1.* TO 'ppaci'@'127.0.0.1';
+GRANT ALL PRIVILEGES ON media_%_ppacilyoncentre_v1.* TO 'ppaci'@'127.0.0.1';
+FLUSH PRIVILEGES;
 
 

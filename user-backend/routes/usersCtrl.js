@@ -1,4 +1,4 @@
-// File = user-backend/routes/usersCtrl.js
+// File = ppacilyoncentre/user-backend/routes/usersCtrl.js
 // Définition des fonctions pour les routes relatives aux utilisateurs 
 
 require('dotenv').config();
@@ -14,39 +14,54 @@ const {
     User
 } = require('../models'); // ou ton ORM
 
+
 module.exports = {
     register: function (req, res) {
+        console.log("📩 [BACKEND] Requête reçue sur /users/register :", req.body);
+
         const email = req.body.email;
         const password = req.body.password;
         const bio = req.body.bio;
         const isAdmin = typeof req.body.isAdmin === 'boolean' ? req.body.isAdmin : false;
 
         if (email === '' || password === '') {
+            console.warn("⚠️ [BACKEND] Paramètres manquants :", { email, password });
             return res.status(400).json({ error: 'Paramètres manquants' });
         }
         if (!EMAIL_REGEX.test(email)) {
+            console.warn("⚠️ [BACKEND] Email invalide :", email);
             return res.status(400).json({ error: 'Adresse e-mail invalide' });
         }
         if (!PASSWORD_REGEX.test(password)) {
+            console.warn("⚠️ [BACKEND] Mot de passe invalide (regex non respectée)");
             return res.status(400).json({ error: 'Mot de passe invalide' });
         }
         if (typeof isAdmin !== 'boolean') {
+            console.warn("⚠️ [BACKEND] isAdmin non booléen :", isAdmin);
             return res.status(400).json({ error: 'Le champ isAdmin doit être un booléen' });
         }
 
         asyncLib.waterfall([
             function (done) {
                 models.User.findOne({ attributes: ['email'], where: { email } })
-                    .then(userFound => done(null, userFound))
-                    .catch(() => res.status(500).json({ error: 'Impossible de vérifier l\'utilisateur' }));
+                    .then(userFound => {
+                        console.log("🔎 [BACKEND] Vérification utilisateur existant :", userFound ? userFound.email : "aucun");
+                        done(null, userFound);
+                    })
+                    .catch(err => {
+                        console.error("❌ [BACKEND] Erreur vérification utilisateur :", err.message);
+                        res.status(500).json({ error: "Impossible de vérifier l'utilisateur" });
+                    });
             },
             function (userFound, done) {
                 if (!userFound) {
                     bcrypt.hash(password, 5, (err, bcryptedPassword) => {
+                        console.log("🔐 [BACKEND] Mot de passe haché généré");
                         done(null, userFound, bcryptedPassword);
                     });
                 } else {
-                    return res.status(409).json({ error: 'L\'utilisateur existe déjà' });
+                    console.warn("⚠️ [BACKEND] Utilisateur déjà existant :", email);
+                    return res.status(409).json({ error: "L'utilisateur existe déjà" });
                 }
             },
             function (userFound, bcryptedPassword, done) {
@@ -55,8 +70,13 @@ module.exports = {
                     password: bcryptedPassword,
                     bio,
                     isAdmin
-                }).then(newUser => done(null, newUser))
-                    .catch(() => res.status(500).json({ error: 'Impossible d\'ajouter l\'utilisateur' }));
+                }).then(newUser => {
+                    console.log("✅ [BACKEND] Nouvel utilisateur créé :", newUser.id, newUser.email);
+                    done(null, newUser);
+                }).catch(err => {
+                    console.error("❌ [BACKEND] Erreur création utilisateur :", err.message);
+                    res.status(500).json({ error: "Impossible d'ajouter l'utilisateur" });
+                });
             },
             function (newUser, done) {
                 models.Profile.create({
@@ -68,13 +88,16 @@ module.exports = {
                     phone2: null,
                     phone3: null,
                     address: null
-                }).then(profile => done(null, newUser, profile))
-                    .catch((err) => {
-                        console.error('Erreur création MediaProfile:', err);
-                        return res.status(500).json({ error: '01-Profil créé mais échec création des médias' });
-                    });
+                }).then(profile => {
+                    console.log("✅ [BACKEND] Profil créé pour utilisateur :", newUser.id);
+                    done(null, newUser, profile);
+                }).catch(err => {
+                    console.error("❌ [BACKEND] Erreur création profil :", err.message);
+                    return res.status(500).json({ error: "01-Profil créé mais échec création des médias" });
+                });
             },
             function (newUser, profile, done) {
+                console.log("📤 [BACKEND] Initialisation des médias par défaut pour profil :", profile.id);
                 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
                 const mediaRequests = [];
@@ -87,7 +110,7 @@ module.exports = {
 
                 for (let slot = 0; slot <= 3; slot++) {
                     mediaRequests.push(
-                        fetch(`${MEDIA_API}/api/mediaProfile/`, {
+                        fetch(`${MEDIA_API}/mediaProfile/`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -102,26 +125,29 @@ module.exports = {
                 }
 
                 Promise.all(mediaRequests)
-                    .then(() => done(newUser))
-                    .catch((err) => {
-                        console.error('Erreur création MediaProfile:', err);
-                        return res.status(500).json({ error: '02-Profil créé mais échec création des médias' });
+                    .then(() => {
+                        console.log("✅ [BACKEND] Médias par défaut créés pour profil :", profile.id);
+                        done(newUser);
+                    })
+                    .catch(err => {
+                        console.error("❌ [BACKEND] Erreur création médias :", err.message);
+                        return res.status(500).json({ error: "02-Profil créé mais échec création des médias" });
                     });
             }
-
         ], function (newUser) {
             if (newUser) {
+                console.log("🎉 [BACKEND] Inscription réussie pour utilisateur :", newUser.id);
                 return res.status(201).json({
                     userId: newUser.id,
-                    message: 'Inscription réussie, redirection vers la page de connexion...',
-                    redirectUrl: '/#login'
+                    message: "Inscription réussie, redirection vers la page de connexion...",
+                    redirectUrl: "/#login"
                 });
             } else {
-                return res.status(500).json({ error: 'Échec final de l\'inscription' });
+                console.error("❌ [BACKEND] Échec final de l'inscription");
+                return res.status(500).json({ error: "Échec final de l'inscription" });
             }
         });
-    }
-    ,
+    },
     login: function (req, res) {
         const email = req.body.email;
         const password = req.body.password;

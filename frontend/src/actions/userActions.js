@@ -1,10 +1,12 @@
 // File: frontend/src/actions/userActions.js
+const USER_API = process.env.REACT_APP_USER_API;
+const MEDIA_API = process.env.REACT_APP_MEDIA_API;
 
 // 🔍 Lire tous les utilisateurs
 export const getUsers = () => async (dispatch) => {
   dispatch({ type: 'GET_USERS_REQUEST' });
   try {
-    const response = await fetch('https://ppacilyoncentre.com/api/users/all/', {
+    const response = await fetch(`${USER_API}/api/users/all/`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('accessToken')}`
       }
@@ -20,7 +22,7 @@ export const getUsers = () => async (dispatch) => {
 export const createUser = (userData) => async (dispatch) => {
   dispatch({ type: 'CREATE_USER_REQUEST' });
   try {
-    const response = await fetch('https://ppacilyoncentre.com/api/users/register', {
+    const response = await fetch(`${USER_API}/api/users/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +41,7 @@ export const createUser = (userData) => async (dispatch) => {
 export const updateUser = (id, userData) => async (dispatch) => {
   dispatch({ type: 'UPDATE_USER_REQUEST' });
   try {
-    const response = await fetch(`https://ppacilyoncentre.com/api/users/${id}`, {
+    const response = await fetch(`${USER_API}/api/users/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -58,7 +60,7 @@ export const updateUser = (id, userData) => async (dispatch) => {
 export const deleteUser = (id) => async (dispatch) => {
   dispatch({ type: 'DELETE_USER_REQUEST' });
   try {
-    const response = await fetch(`https://ppacilyoncentre.com/api/users/${id}`, {
+    const response = await fetch(`${USER_API}/api/users/${id}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('accessToken')}`

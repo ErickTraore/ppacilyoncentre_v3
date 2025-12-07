@@ -9,7 +9,6 @@ import ContactForm from '../contactForm/ContactForm';
 import Attestation from '../attestation/Attestation';
 import Login from '../login/Login';
 import Zoompage from '../zoompage/Zoompage';
-import Messages from '../messages/Messages';
 import MessageList from "../messagelist/MessageList";
 import Presse from '../admin/presse/Presse';
 import ProfilePage from '../profilepage/ProfilePage';
@@ -24,7 +23,6 @@ const PageContent = ({ activePage }) => {
       {activePage === 'login' && <Login />} 
       {activePage === 'attestation' && <Attestation />} 
       {activePage === 'zoompage' && <Zoompage />} 
-      {activePage === 'messages' && <Messages />}
       {activePage === 'messagelist' && <MessageList/>}
       {activePage === 'presse' && <Presse />}
       {activePage === 'profilepage' && <ProfilePage userId={1} />} 

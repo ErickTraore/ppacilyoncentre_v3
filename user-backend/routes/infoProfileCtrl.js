@@ -4,19 +4,31 @@ const { Profile } = require('../models');
 
 // 🔍 Lire un profil par ID
 exports.getInfoProfile = async (req, res) => {
-  const userId = req.userId;
+  
   try {
-    console.log('🔍 userId reçu dans getInfoProfile:', req.userId);
-    const profile = await Profile.findOne({ where: { userId } });
-    if (!profile) {
-      return res.status(404).json({ error: 'Profil introuvable' });
+    const userId = req.userId; // ✅ cohérent avec middleware
+    console.log('🔍 userId reçu dans getInfoProfile:', userId);
+    if (!userId) {
+      return res.status(401).json({ error: 'Token invalide ou userId absent' });
     }
-    res.status(200).json(profile);
+    const profile = await Profile.findOne({ where: { userId } });
+
+  if (!profile) {
+      // ✅ informer explicitement l’utilisateur
+      return res.status(404).json({
+        message: `Aucun profil trouvé pour l’utilisateur ${userId}.`,
+        suggestion: 'Veuillez créer votre profil avant de le consulter.'
+      });
+    }
+
+    return res.status(200).json(profile);
   } catch (error) {
     console.error('❌ Erreur lecture profil utilisateur :', error);
-    res.status(500).json({ error: 'Erreur serveur.' });
+    return res.status(500).json({ error: 'Erreur serveur lors de la récupération du profil' });
   }
 };
+
+
 
 
 // ✏️ Mettre à jour un profilInfo
