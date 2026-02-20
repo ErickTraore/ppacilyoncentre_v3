@@ -1,179 +1,157 @@
-// File: frontend/src/components/messages/MessageList.jsx
+// Rendu presse générale Consulter — aligné cppeurope (PresseList + PresseTextOnly)
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchMessages } from '../../actions/messageActions';
+import '../../styles/pages/MessagesList.scss';
 
-import React, { useEffect, useState } from 'react'; 
-import { useDispatch, useSelector } from 'react-redux'; 
-import { fetchMessages } from '../../actions/messageActions'; 
-import '../messagelist/MessageList.css';
-
-const MEDIA_API = process.env.REACT_APP_MEDIA_API;
-
-
-
-const MEDIA_BACKEND_URL =`${MEDIA_API}/getMedia`;
+const API_BASE = (process.env.REACT_APP_USER_API || '').replace(/\/$/, '');
 
 const getMessageViewType = (message) => {
-  const hasImage = Array.isArray(message.media) && message.media.some((m) => 
-    m.type === 'image'
-); 
-const hasVideo = Array.isArray(message.media) && message.media.some((m) => 
-  m.type === 'video');
-
-  let pressetype = '';
-
-  if (!hasImage && !hasVideo) { pressetype = 'text-only'; 
-
-  } else if (hasImage && !hasVideo) { pressetype = 'image-only'; 
-    
-  } else if (!hasImage && hasVideo) { pressetype = 'video-only'; } else if (hasImage && hasVideo) { pressetype = 'image-and-video'; }
-
-  return pressetype;
+  const media = message.media;
+  const hasMedia = Array.isArray(media) && media.length > 0;
+  if (!hasMedia) return 'text-only';
+  const hasImage = media.some((m) => m.type === 'image');
+  const hasVideo = media.some((m) => m.type === 'video');
+  if (hasImage && !hasVideo) return 'image-only';
+  if (!hasImage && hasVideo) return 'video-only';
+  if (hasImage && hasVideo) return 'image-and-video';
+  return 'text-only';
 };
 
-const MessageList = () => {
-  const dispatch = useDispatch(); 
-  const messages = useSelector((state) => state.messages.messages); 
-  const [activeMessageId, setActiveMessageId] = useState(null); 
+const TITLES = { presse: '📝 Presse PPA-CI', 'presse-locale': '📍 Presse Locale' };
+
+const MessageList = ({ categ = 'presse', embed = false }) => {
+  const dispatch = useDispatch();
+  const messagesByCateg = useSelector((state) => state.messages.messagesByCateg) || {};
+  const messages = messagesByCateg[categ] ?? [];
+  const [activeId, setActiveId] = useState(null);
   const [activeImageId, setActiveImageId] = useState(null);
-
-  const toggleText = (id) => { setActiveMessageId((prevId) => (prevId === id ? null : id)); };
-
-  const isActive = (id) => activeMessageId === id;
-
-  const toggleImageText = (id) => { setActiveImageId((prevId) => (prevId === id ? null : id)); };
-
+  const toggle = (id) => setActiveId((prev) => (prev === id ? null : id));
+  const isActive = (id) => activeId === id;
+  const toggleImageText = (id) => setActiveImageId((prev) => (prev === id ? null : id));
   const isImageActive = (id) => activeImageId === id;
 
-  useEffect(() => { dispatch(fetchMessages()); }, [dispatch]);
-
   useEffect(() => {
-    if (!messages || messages.length === 0) return;
+    dispatch(fetchMessages(categ));
+  }, [dispatch, categ]);
 
-    const validMessages = Array.isArray(messages)
-      ? messages.filter((msg) => msg && msg.id)
-      : [];
+  const renderMessage = (message) => {
+    const type = getMessageViewType(message);
+    const author = message.User?.email || 'Utilisateur inconnu';
+    const date = message.createdAt ? new Date(message.createdAt).toLocaleString() : '';
 
-    if (validMessages.length === 0) return;
+    if (type === 'text-only') {
+      return (
+        <div
+          key={message.id}
+          className={`presse__message presse__message--text-only`}
+        >
+          <div className="presse__message__header" onClick={() => toggle(message.id)}>
+            <p className="presse__message__header__title">{message.title}</p>
+            <p className="presse__message__header__author">
+              Expédié par : {author}
+              <span className="presse__message__header__author__date"> ({date})</span>
+            </p>
+          </div>
+          {isActive(message.id) && (
+            <p className="presse__message__content">{message.content}</p>
+          )}
+        </div>
+      );
+    }
 
-    const fetchMediaForMessages = async () => {
-      try {
-        const enrichedMessages = await Promise.all(
-          validMessages.map(async (message) => {
-            console.log(`${MEDIA_BACKEND_URL}/${message.id}`)
-            const response = await fetch(`${MEDIA_BACKEND_URL}/${message.id}`, {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-              },
-            });
-            if (!response.ok) {
-              return { ...message, media: [] };
-            }
-            const mediaData = await response.json();
-            return { ...message, media: mediaData || [] };
-          })
-        );
+    if (type === 'image-only') {
+      return (
+        <div
+          key={message.id}
+          className={`presse__message presse__message--image-only ${isImageActive(message.id) ? 'active' : ''}`}
+        >
+          <div className="presse__message__header" onClick={() => toggleImageText(message.id)}>
+            <p className="presse__message__header__title">{message.title}</p>
+            <p className="presse__message__header__author">
+              Expédié par : {author}
+              <span className="presse__message__header__author__date"> ({date})</span>
+            </p>
+          </div>
+          <div className="presse__message__media">
+            <div className="presse__message__media__grid">
+              {message.media.map((file, index) => (
+                <div key={file.filename || file.id || index}>
+                  <img src={`${API_BASE}/api/uploads/images/${file.filename}`} alt="" />
+                </div>
+              ))}
+            </div>
+          </div>
+          {isImageActive(message.id) && (
+            <p className="presse__message__content">{message.content}</p>
+          )}
+        </div>
+      );
+    }
 
-        dispatch({ type: 'UPDATE_MESSAGES', payload: enrichedMessages });
-      } catch (error) {
-        console.error('Erreur lors du fetch des médias :', error);
-      }
-    };
+    if (type === 'video-only' || type === 'image-and-video') {
+      return (
+        <div
+          key={message.id}
+          className={`presse__message presse__message--${type} ${isImageActive(message.id) ? 'active' : ''}`}
+        >
+          <div className="presse__message__header" onClick={() => toggleImageText(message.id)}>
+            <p className="presse__message__header__title">{message.title}</p>
+            <p className="presse__message__header__author">
+              Expédié par : {author}
+              <span className="presse__message__header__author__date"> ({date})</span>
+            </p>
+          </div>
+          <div className="presse__message__media">
+            <div className="presse__message__media__grid">
+              {message.media?.map((file, index) => (
+                <div key={file.filename || file.id || index}>
+                  {file.type === 'image' ? (
+                    <img src={`${API_BASE}/api/uploads/images/${file.filename}`} alt="" />
+                  ) : (
+                    <video controls>
+                      <source src={`${API_BASE}/api/uploads/videos/${file.filename}`} type="video/mp4" />
+                    </video>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          {isImageActive(message.id) && (
+            <p className="presse__message__content">{message.content}</p>
+          )}
+        </div>
+      );
+    }
 
-    fetchMediaForMessages();
+    return (
+      <div key={message.id} className="presse__message presse__message--text-only">
+        <p>⚠️ Format non reconnu.</p>
+      </div>
+    );
+  };
 
-  }, [messages]);
+  const listContent =
+    !Array.isArray(messages) || messages.length === 0 ? (
+      <div className="presse__container__messagelist__empty">
+        <h3 className="presse__container__messagelist__empty__nothing">📭 Aucun message</h3>
+        <p className="presse__container__messagelist__empty__add">
+          Connectez-vous pour publier le premier message.
+        </p>
+      </div>
+    ) : (
+      messages.map(renderMessage)
+    );
+
+  if (embed) {
+    return <>{listContent}</>;
+  }
 
   return (
-    <div>
-      <div className="presse">
-          📝 Presse PPA-CI
-      </div>
-      <div className="messagelist"> 
-        {!Array.isArray(messages) || messages === undefined ? (
-          <p className="error-message">⚠️ Erreur : données des messages non disponibles.</p>
-        ) : messages.length === 0 ? (
-          <div className="no-message">
-            <h3>📭 Aucun message pour le moment</h3>
-            <p>Connectez-vous pour publier le premier message.</p>
-          </div>
-        ) : (
-          messages.map((message) => {
-            const pressetype = getMessageViewType(message);
-
-            return (
-              <div key={message.id} className={`message-card ${pressetype} ${isImageActive(message.id) ? 'active' : ''}`}>              
-                {pressetype === 'text-only' && (
-                  <>
-                    <h3 onClick={() => toggleText(message.id)}>{message.tittle}</h3>
-                    {isActive(message.id) && (
-                      <>
-                        <p>{message.content}</p>
-                        <p className="author">
-                          Expédié par : {message.User?.email || 'Utilisateur inconnu'} <span className="created-date">({new Date(message.createdAt).toLocaleString()})</span>
-                        </p>
-                      </>
-                    )}
-                  </>
-                )}
-
-                {pressetype === 'image-only' && (
-                  <>
-                    <div className="media-grid">
-                      {message.media.map((file, index) => (
-                        <div key={file.filename} className="media-item">
-                          {index === 0 && (
-                            <h3 onClick={() => toggleImageText(message.id)}>{message.tittle}</h3>
-                          )}
-                          <img src={`${MEDIA_API}/api/uploads/images/${file.filename}`} alt="Message media" />
-                        </div>
-                      ))}
-                    </div>
-                    <div className="media-content">
-                      <p>{message.content}</p>
-                      <p className="author">Expédié par : {message.User?.email || 'Utilisateur inconnu'} <span className="created-date">({new Date(message.createdAt).toLocaleString()})</span></p>
-                    </div>
-                  </>
-                )}
-
-                {(pressetype === 'video-only' || pressetype === 'image-and-video') && (
-                  <>
-                    <div className="media-grid">
-                      {message.media?.map((file, index) => (
-                        <div key={file.filename} className="media-item">
-                          {index === 0 && <h3>{message.tittle}</h3>}
-                          {file.type === 'image' ? (
-                            <img
-                              src={`${MEDIA_API}/api/uploads/images/${file.filename}`}
-                              alt="Message media"
-                            />
-                          ) : (
-                            <video controls>
-                              <source
-                                src={`${MEDIA_API}/api/uploads/videos/${file.filename}`}
-                                type="video/mp4"
-                              />
-                              Votre navigateur ne supporte pas la lecture des vidéos.
-                            </video>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <p>{message.content}</p>
-                    <p className="author">
-                      Expédié par : {message.User?.email || 'Utilisateur inconnu'} <span className="created-date">({new Date(message.createdAt).toLocaleString()})</span>
-                    </p>
-                  </>
-                )}
-
-                {pressetype !== 'text-only' &&
-                  pressetype !== 'image-only' &&
-                  pressetype !== 'video-only' &&
-                  pressetype !== 'image-and-video' && (
-                    <p>⚠️ Type de message inconnu ou mal structuré.</p>
-                  )}
-              </div>
-            );
-          })
-        )}
+    <div className="presse">
+      <div className="presse__container">
+        <div className="presse__container__title">{TITLES[categ] || TITLES.presse}</div>
+        <div className="presse__container__messagelist">{listContent}</div>
       </div>
     </div>
   );

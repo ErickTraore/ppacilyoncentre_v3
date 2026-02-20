@@ -6,7 +6,11 @@
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "eject": "react-scripts eject",
+        "cypress:open": "cypress open",
+        "cypress:run": "env -u ELECTRON_RUN_AS_NODE cypress run --browser chromium",
+        "test:e2e": "env -u ELECTRON_RUN_AS_NODE cypress run --browser chromium --spec 'cypress/e2e/session.cy.js,cypress/e2e/profilePage.cy.js'",
+        "test:e2e:optimum": "env -u ELECTRON_RUN_AS_NODE cypress run --browser chromium --spec cypress/e2e/presseLocaleEndToEnd.cy.js"
     },
     "dependencies": {
         "@emailjs/browser": "^4.4.1",
@@ -35,6 +39,8 @@
     "devDependencies": {
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.0",
+        "baseline-browser-mapping": "^2.9.11",
+        "cypress": "^14.5.4",
         "jest": "^24.9.0",
         "redux-mock-store": "^1.5.5"
     },

@@ -10,14 +10,6 @@ module.exports = {
       }
     },
     {
-      name: 'media-backend-ppaci',
-      script: 'server.prod.js',          // ✅ Production officiel
-      cwd: './media-backend',
-      env: {
-        NODE_ENV: 'production'
-      }
-    },
-    {
       name: 'frontend-ppaci',
       script: 'npx',
       args: 'serve -s build -l 8080',

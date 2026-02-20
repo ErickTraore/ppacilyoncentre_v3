@@ -1,3 +1,4 @@
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -94,7 +95,6 @@ select * from Medias;
 
 BACKEND
 cd user-backend
-cd media-backend
 npm i
 node server.js
 

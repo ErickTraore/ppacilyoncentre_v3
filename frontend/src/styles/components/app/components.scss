@@ -4,7 +4,7 @@ html,
 body {
   background: #f1f1f1;
   font-family: 'Merriweather', sans-serif;
-  padding: 0.5em;
+  // padding: 0.5em;
 }
 
 .App {
@@ -18,158 +18,258 @@ body {
     height: 100%;
     display: flex;
     flex-direction: row;
-    align-items: stretch;
-    justify-content: space-between; // ✅ Ajouté
-    padding: 4px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 1rem;
     background-color: rgb(125, 154, 236);
     border: solid 1px darkblue;
     border-radius: 10px;
-    ;
 
     &__logo {
+      flex: 0 1 15%;
       width: 15%;
-      height: auto;
+      min-width: 2em;
+      aspect-ratio: 1;
       display: flex;
       align-items: center;
 
       &__img {
         width: 100%;
         height: 100%;
-        display: flex;
+        object-fit: contain;
         border-radius: 10px;
       }
     }
 
     &__panneau {
-      width: 75%;
-      height: auto;
+      flex: 0 1 65%;
+      min-width: 0;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: stretch;
       flex-direction: column;
+      gap: 0.1em;
 
-      &__text-1 {
+      &__text-1,
+      &__text-2 {
         width: 100%;
-        height: 50%;
-        margin: 0px 0px;
-        font-size: 0.9rem;
+        min-width: 0;
+        margin: 0;
         color: white;
         text-align: center;
         font-weight: bold;
+        line-height: 1.2;
+        box-sizing: border-box;
+      }
 
+      &__text-1 {
+        font-size: clamp(0.5rem, 5vw, 0.9rem);
       }
 
       &__text-2 {
-        width: 100%;
-        height: 50%;
-        margin: 0px 0px;
-        font-size: 0.6rem;
-        color: white;
-        text-align: center;
-        font-weight: bold;
-
+        font-size: clamp(0.4rem, 3.5vw, 0.6rem);
       }
     }
 
     &__actions {
-      width: 10%;
-      height: auto; // ✅ s'étend sur toute la hauteur du header
+      flex: 0 1 20%;
+      min-width: 0;
+      height: auto;
       display: flex;
       flex-direction: column;
-      justify-content: space-between; // ✅ espace maximal entre les enfants
-      align-items: center;
-      &__buttons {
-        width: 100%;
-        height: 40%;
+      justify-content: center;
+      gap: clamp(0.25rem, 0.6vw, 0.7rem);
+      align-items: stretch;
+      overflow: hidden;
+
+      @media (min-width: 768px) {
+        gap: 20px;
+      }
+
+      // Bandeau blanc commun pour cadenas et hamburger
+      %bandeau-blanc {
+        flex: 0 0 auto;
+        min-width: 0;
+        max-width: 100%;
+        background: white;
+        border-radius: 8px;
+        padding: 0.4em 0.5em;
         display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        height: 2.5em;
+      }
+
+      // App__header__actions contient : cadenas et hamburger (2 enfants directs)
+      &__cadenas {
+        @extend %bandeau-blanc;
+        width: 100%;
+        cursor: pointer;
+        flex-direction: row;
+        gap: 0.3em;
         justify-content: center;
         align-items: center;
-        &__logout {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          color: white;
-          cursor: pointer;
-          background-color: rgb(125, 154, 236);
-          border: none;
-          &__fa {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 4vw;
-            font-weight: bold;
-            color: white;
+        padding: 0.4em max(3px, 0.5em);
+
+        &__icon {
+          flex: 0 0 auto;
         }
+
+        &__timer {
+          flex: 0 0 auto;
+        }
+
+        // 320px : les bandeaux doivent remplir l'intérieur du cadre (même largeur que le hamburger)
+        @media (max-width: 320px) {
+          padding: 0.4em 0;
+
+          &__icon {
+            font-size: 0.9em;
+          }
+
+          &__timer {
+            font-size: 0.85em;
+          }
         }
       }
 
-      &__hamburger {
+      &__hamburger__icon {
+        @extend %bandeau-blanc;
         width: 100%;
-        height:30%;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
+        border: none;
+        font-size: 1.2em;
+        cursor: pointer;
 
-        &__icon {
-          font-size: clamp(14px, 4vw, 40px);
-          width: 100%;
-          height: auto;
-          display: flex;
-          cursor: pointer;
-          border: none;
-          display: none;
-          border-radius: 4px;
-          background-color: white;
-          color: darkblue;
-        }
-
-        &__icon {
-          display: block;
+        // À 320px, aligner visuellement le bandeau sur celui du cadenas
+        @media (max-width: 320px) {
+          padding: 0.4em 0;
         }
       }
-
     }
 
   }
 }
 
+// Menu vertical admin : cadres arrondis, bandeau blanc, UX moderne
 .menu {
   display: none;
   position: absolute;
-  top: 40px;
-  left: 0;
-  width: 100%;
-  /* Assurez-vous que le menu prend toute la largeur */
-  background: #333;
+  top: 3.5rem;
+  left: 1rem;
+  width: 16rem;
+  max-width: calc(100vw - 2rem);
   z-index: 1000;
-  color: white;
-  list-style: none;
-  padding: 10px;
-  border-radius: 4px;
-  justify-content: center;
-  /* Centre le contenu horizontalement */
-  align-items: center;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
 
   &.open {
-    display: flex;
+    display: block;
   }
 
-  ul {
+  .menu__list {
     margin: 0;
     padding: 0;
+    list-style: none;
     display: flex;
     flex-direction: column;
-    align-items: flex-start; // ✅ correction ici
+    gap: 0.5rem;
+  }
 
-    li {
-      padding: 10px 20px;
+  .menu__card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    &.active {
+      box-shadow: 0 0 0 2px rgb(125, 154, 236);
+      background: #f0f3ff;
+    }
+
+    &.has-submenu .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      min-height: 2.75rem;
+    }
+
+    &:not(.has-submenu) .menu-link {
+      display: block;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    .menu-link {
+      background: transparent;
+      border: none;
+      color: #1a1a1a;
+      font-size: 0.9375rem;
+      font-weight: 500;
       cursor: pointer;
+      padding: 0;
+      flex: 1;
+    }
+
+    .submenu-toggle {
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
+      border-radius: 6px;
+      color: #444;
+      cursor: pointer;
+      font-size: 0.7rem;
+      transition: background 0.2s ease;
 
       &:hover {
-        background: #555;
+        background: rgba(0, 0, 0, 0.1);
       }
+    }
+
+    .submenu {
+      list-style: none;
+      margin: 0;
+      padding: 0.25rem 0 0.5rem 0.5rem;
+      padding-left: 1rem;
+      border-left: 3px solid rgba(125, 154, 236, 0.35);
+      margin-left: 1rem;
+      margin-bottom: 0.5rem;
+      display: none;
+    }
+
+    &.open .submenu {
+      display: block;
+    }
+
+    .submenu li {
+      margin-bottom: 0.15rem;
+    }
+
+    .submenu-link {
+      display: block;
+      width: 100%;
+      padding: 0.35rem 0;
+      background: transparent;
+      border: none;
+      text-align: left;
+      color: #333;
+      font-size: 0.875rem;
+      cursor: pointer;
     }
   }
 }
@@ -199,10 +299,51 @@ body {
   font-size: 14px;
 }
 
-
+// ✅ Support sous-menus pour le menu horizontal (aligné sur cppeurope)
+.horizontal-menu .menu-link,
+.horizontal-menu .submenu-link {
+  background: transparent;
+  border: none;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
 
 .horizontal-menu li:hover {
   background: #555;
+}
+
+.horizontal-menu .submenu-toggle {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+.horizontal-menu .submenu {
+  list-style: none;
+  margin: 6px 0 0 0;
+  padding: 8px;
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 6px;
+  z-index: 1100;
+}
+
+.horizontal-menu li.open .submenu {
+  display: block;
+}
+
+.horizontal-menu .submenu li {
+  padding: 6px 10px;
+  white-space: nowrap;
 }
 
 .horizontal-menu {

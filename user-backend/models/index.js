@@ -20,24 +20,25 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
 
 console.log(`🔌 Initialisation Sequelize pour la base : ${config.database}`);
 
-// ✅ Import des modèles
+// ✅ Import des modèles (Presse Générale = PresseGle, aligné cppeurope)
 console.log("📥 Import des modèles...");
 const User = require('./user')(sequelize, DataTypes);
 console.log("✅ Modèle User chargé");
-const Message = require('./message')(sequelize, DataTypes);
-console.log("✅ Modèle Message chargé");
+const PresseGle = require('./presseGle')(sequelize, DataTypes);
+console.log("✅ Modèle PresseGle chargé");
+const Message = PresseGle; // Alias pour compatibilité
 const Profile = require('./profile')(sequelize, DataTypes);
 console.log("✅ Modèle Profile chargé");
 
 // ✅ Définir les associations
 console.log("🔗 Définition des associations...");
 if (User.associate) {
-  User.associate({ Message, Profile });
+  User.associate({ Message, PresseGle, Profile });
   console.log("🔗 Association User ↔ Message, Profile définie");
 }
-if (Message.associate) {
-  Message.associate({ User });
-  console.log("🔗 Association Message ↔ User définie");
+if (PresseGle.associate) {
+  PresseGle.associate({ User });
+  console.log("🔗 Association PresseGle ↔ User définie");
 }
 if (Profile.associate) {
   Profile.associate({ User });
@@ -50,5 +51,6 @@ module.exports = {
   sequelize,
   User,
   Message,
+  PresseGle,
   Profile,
 };

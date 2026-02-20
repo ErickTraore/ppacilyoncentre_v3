@@ -8,8 +8,10 @@ import {
   fetchProfileMedia,
   updateProfileMedia
 } from '../../actions/profileActions';
+import "../../styles/pages/ProfilePage.scss";
 
-const MEDIA_API = process.env.REACT_APP_MEDIA_API;
+
+const MEDIA_API = process.env.REACT_APP_MEDIA_API || '';
 
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -32,6 +34,7 @@ const ProfilePage = () => {
   });
 
   const [uploading, setUploading] = useState({});
+  // eslint-disable-next-line no-unused-vars -- reserved for media edit state
   const [mediaEdits, setMediaEdits] = useState({}); // { [id]: { url } }
 
   useEffect(() => {
@@ -130,59 +133,125 @@ const ProfilePage = () => {
   if (error) return <div>Erreur : {error}</div>;
   const safeSlots = Array.isArray(slots) ? slots : [];
 
-
-
-  return (
-    <div>
-      <h1>Profil de l'utilisateur</h1>
+ return (
+    <div className="profile-page">
+      <h3>Mon profil</h3>
 
       {/* 🔹 Menu d’onglets */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-        <button onClick={() => setActiveTab('infos')}>Mes infos</button>
-        <button onClick={() => setActiveTab('images')}>Mes images</button>
-        <button onClick={() => setActiveTab('bio')}>Ma biographie</button>
+      <div className="tabs">
+        <button onClick={() => setActiveTab("infos")}>Mes infos</button>
+        <button onClick={() => setActiveTab("images")}>Mes images</button>
+        <button onClick={() => setActiveTab("bio")}>Ma biographie</button>
       </div>
 
       {/* 🔹 Onglet "Mes infos" */}
-      {activeTab === 'infos' && (
-        <form onSubmit={handleSubmit}>
-          <p><label>Nom : </label><input name="firstName" value={form.firstName} onChange={handleChange} /></p>
-          <p><label>Prénom : </label><input name="lastName" value={form.lastName} onChange={handleChange} /></p>
-          <p><label>Email : </label><input name="email" value={form.email} onChange={handleChange} /></p>
-          <p><label>Téléphone 1 : </label><input name="phone1" value={form.phone1} onChange={handleChange} /></p>
-          <p><label>Téléphone 2 : </label><input name="phone2" value={form.phone2} onChange={handleChange} /></p>
-          <p><label>Téléphone 3 : </label><input name="phone3" value={form.phone3} onChange={handleChange} /></p>
-          <p><label>Adresse : </label><textarea name="address" value={form.address} onChange={handleChange} /></p>
-          <button type="submit">Enregistrer</button>
+      {activeTab === "infos" && (
+        <form className="infosform" onSubmit={handleSubmit}>
+          <div className="infosform__row">
+            <div className="infosform__row__label">Nom</div>
+            <input
+              className="infosform__row__input"
+              name="lastName"
+              value={form.lastName}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="infosform__row">
+            <div className="infosform__row__label">Prénom</div>
+            <input
+              className="infosform__row__input"
+              name="firstName"
+              value={form.firstName}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="infosform__row">
+            <div className="infosform__row__label">Email</div>
+            <input
+              className="infosform__row__input"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="infosform__row">
+            <div className="infosform__row__label">Phone-1</div>
+            <input
+              className="infosform__row__input"
+              name="phone1"
+              value={form.phone1}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="infosform__row">
+            <div className="infosform__row__label">Phone-2</div>
+            <input
+              className="infosform__row__input"
+              name="phone2"
+              value={form.phone2}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="infosform__row">
+            <div className="infosform__row__label">Phone-3</div>
+            <input
+              className="infosform__row__input"
+              name="phone3"
+              value={form.phone3}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="infosform__row">
+            <div className="infosform__row__label">Adresse :</div>
+            <input
+              className="infosform__row__input"
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+            />
+          </div>
+
+          <button type="submit" className="infosform__button">
+            Enregistrer
+          </button>
         </form>
       )}
 
       {/* 🔹 Onglet "Mes images" */}
-      {activeTab === 'images' && (
-        <div>
+      {activeTab === "images" && (
+        <div className="images__container">
           {mediaLoading && <p>Chargement des images...</p>}
           {mediaError && <p>Erreur : {mediaError}</p>}
-          {!mediaLoading && safeSlots.length === 0 && (
-            Object.values(uploading).some(Boolean)
-              ? <p>⏳ Téléversement en cours...</p>
-              : <p>Aucune image disponible.</p>
-          )}
+          {!mediaLoading &&
+            safeSlots.length === 0 &&
+            (Object.values(uploading).some(Boolean) ? (
+              <p>⏳ Téléversement en cours...</p>
+            ) : (
+              <p>Aucune image disponible.</p>
+            ))}
 
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
+          <div className="images__container__grid">
             {safeSlots.map((media) => (
-              <div key={media.id} style={{ border: '1px solid #ccc', padding: '1rem' }}>
-                  <img
-                    src={`https://ppacilyoncentre.com${media.path}`}
-                    alt="profileImage"
-                    style={{ width: '150px', height: 'auto', borderRadius: '4px' }}
+              <div key={media.id} className="images__container__grid__card">
+                <img
+                  src={`https://www.ppacilyoncentre.com${media.path}`}
+                  alt="ProfileImage"
+                  className="profile-image"
                 />
 
-                <div style={{ marginTop: '1rem' }}>
+                <div className="images__container__grid__card__upload">
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleFileUpload(media.id, e.target.files[0])}
+                    onChange={(e) =>
+                      handleFileUpload(media.id, e.target.files[0])
+                    }
                     disabled={uploading[media.id]}
                   />
                   {uploading[media.id] && <p>⏳ Téléversement en cours...</p>}
@@ -194,13 +263,15 @@ const ProfilePage = () => {
       )}
 
       {/* 🔹 Onglet "Ma biographie" */}
-      {activeTab === 'bio' && (
-        <div>
+      {activeTab === "bio" && (
+        <div className="bio-section">
           <p>📝 Biographie à intégrer ici</p>
         </div>
       )}
     </div>
   );
+
+  
 };
 
 export default ProfilePage;

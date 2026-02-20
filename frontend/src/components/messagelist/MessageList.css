@@ -109,13 +109,17 @@
   cursor: pointer;
 }
 
-/* Contenu texte masqué par défaut pour image-only */
-.message-card.image-only .media-content {
+/* Contenu texte masqué par défaut pour image / vidéo - affiché au clic sur le titre */
+.message-card.image-only .media-content,
+.message-card.video-only .media-content,
+.message-card.image-and-video .media-content {
   display: none;
   margin-top: 1rem;
 }
 
-.message-card.image-only.active .media-content {
+.message-card.image-only.active .media-content,
+.message-card.video-only.active .media-content,
+.message-card.image-and-video.active .media-content {
   display: block;
 }
 
@@ -129,9 +133,44 @@
 
 
 
-/* Vues conditionnelles */
+/* Option-1 (text-only) : titre cliquable, contenu se déplie en dessous — aligné rendu cppeurope */
+.message-card.text-only {
+  border-left: 4px solid #667eea;
+}
+
 .message-card.text-only h3 {
   cursor: pointer;
+  margin-bottom: 0;
+  transition: background-color 0.15s ease;
+}
+
+.message-card.text-only h3:hover {
+  background-color: #e8e8e8;
+}
+
+.message-card.text-only h3:focus {
+  outline: none;
+}
+
+.message-card.text-only h3:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Contenu déplié : bloc sous le titre, sans cadre parasite */
+.message-card.text-only p {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #374151;
+}
+
+.message-card.text-only p.author {
+  border-top: none;
+  margin-top: 0.5rem;
+  padding-top: 0;
 }
 
 .message-card.image-only h3,

@@ -27,8 +27,13 @@ exports.router = (function () {
     apiRouter.route('/users/extend-session').post(refreshAuthMiddleware, usersCtrl.extendSession);
     apiRouter.route('/users/:id').delete(authMiddleware, isAdminMiddleware, usersCtrl.deleteUser);
     apiRouter.route('/users/:id').put(authMiddleware, isAdminMiddleware, usersCtrl.updateUserById);
+
+    // Presse Générale uniquement (table PresseGle, BDD user-backend) — accepter avec ou sans slash final
+    apiRouter.route('/users/messages/new').post(authMiddleware, isAdminMiddleware, messagesCtrl.createMessage);
     apiRouter.route('/users/messages/new/').post(authMiddleware, isAdminMiddleware, messagesCtrl.createMessage);
     apiRouter.route('/users/messages/').get(authMiddleware, messagesCtrl.listMessages);
+    apiRouter.route('/users/messages/:id').put(authMiddleware, isAdminMiddleware, messagesCtrl.updateMessage);
+    apiRouter.route('/users/messages/:id').delete(authMiddleware, isAdminMiddleware, messagesCtrl.deleteMessage);
     apiRouter.route('/zoom/signature').get(zoomCtrl.getSignature);
 
     apiRouter.route('/infoProfile/user').get(authMiddleware, infoProfileCtrl.getInfoProfile);

@@ -1,28 +1,34 @@
 // File: frontend/src/components/session/SessionManager.jsx
+// Modale 60s au login ; après "Prolonger", timer = durée JWT (30 min côté backend).
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
+import Spinner from '../common/Spinner';
 
 const USER_API = process.env.REACT_APP_USER_API;
 const expiryWarning = parseInt(process.env.REACT_APP_SESSION_EXPIRY_WARNING, 10) || 60;
 
-const SessionManager = () => {
-  const dispatch = useDispatch();
+const SessionContext = createContext({
+  timeLeft: 0,
+  setTimeLeft: () => {},
+  switchToRealToken: () => {},
+  isInitialSession: true,
+  justLoggedIn: false,
+});
+
+export const useSessionTimer = () => {
+  const context = useContext(SessionContext);
+  return context?.timeLeft || 0;
+};
+
+// SessionProvider : logique strictement identique à cppeurope (validée en prod)
+export const SessionProvider = ({ children, isAuthenticated = false, accessToken = null }) => {
   const [timeLeft, setTimeLeft] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-  const [modalCountdown, setModalCountdown] = useState(expiryWarning);
-  const [isExtending, setIsExtending] = useState(false);
-
-  const modalTimerRef = useRef(null);
-
-  const handleLogout = useCallback(() => {
-    dispatch({ type: 'LOGOUT' });
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    window.location.hash = 'auth';
-    window.location.reload();
-  }, [dispatch]);
+  const [isInitialSession, setIsInitialSession] = useState(true);
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
+  const prevAuthRef = useRef(false);
+  const lastTokenRef = useRef(null);
 
   const getTokenRemainingTime = () => {
     const token = localStorage.getItem('accessToken');
@@ -38,81 +44,127 @@ const SessionManager = () => {
   };
 
   useEffect(() => {
-    const syncRemaining = () => {
-      const remaining = getTokenRemainingTime();
-      if (remaining > 0) {
-        setTimeLeft(remaining);
-      } else {
-        console.warn("Token expiré après extension, mais minuterie relancée");
-      }
-    };
+    const wasAuth = prevAuthRef.current;
+    prevAuthRef.current = isAuthenticated;
 
-    // Laisse le temps au token d’être stocké
-    const delay = setTimeout(syncRemaining, 100);
+    if (!isAuthenticated) {
+      lastTokenRef.current = null;
+      setTimeLeft(0);
+      setIsInitialSession(true);
+      setJustLoggedIn(false);
+      return;
+    }
 
-    return () => clearTimeout(delay);
-  }, [isExtending]);
+    if (isAuthenticated && !wasAuth) {
+      lastTokenRef.current = accessToken;
+      setIsInitialSession(true);
+      setJustLoggedIn(true);
+      setTimeLeft(expiryWarning);
+      sessionStorage.setItem('sessionJustLoggedIn', '1');
+    }
 
-
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-
-    const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setShowModal(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [timeLeft]);
+    if (isAuthenticated && wasAuth && accessToken && accessToken !== lastTokenRef.current) {
+      lastTokenRef.current = accessToken;
+      setIsInitialSession(false);
+      setJustLoggedIn(false);
+      setTimeLeft(getTokenRemainingTime());
+      sessionStorage.removeItem('sessionJustLoggedIn');
+    }
+  }, [isAuthenticated, accessToken]);
 
   useEffect(() => {
-    if (showModal) {
-      setModalCountdown(expiryWarning);
-      modalTimerRef.current = setInterval(() => {
-        setModalCountdown(prev => {
-          if (prev <= 1) {
-            clearInterval(modalTimerRef.current);
-            handleLogout();
-            return 0;
-          }
-          return prev - 1;
-        });
+    if (!isAuthenticated) return;
+    if (isInitialSession && justLoggedIn) {
+      setTimeLeft(expiryWarning);
+      let current = expiryWarning;
+      const timer = setInterval(() => {
+        current -= 1;
+        setTimeLeft(current);
+        if (current <= 0) clearInterval(timer);
       }, 1000);
+      return () => clearInterval(timer);
     }
-    return () => clearInterval(modalTimerRef.current);
-  }, [showModal, handleLogout]);
-  useEffect(() => {
-    const syncToken = () => {
-      const remaining = getTokenRemainingTime();
-      if (remaining <= 0) return handleLogout();
-      setTimeLeft(remaining);
-    };
+  }, [isInitialSession, justLoggedIn, isAuthenticated]);
 
-    window.addEventListener('storage', syncToken);
-    return () => window.removeEventListener('storage', syncToken);
-  }, [handleLogout]);
   useEffect(() => {
-    if (timeLeft <= expiryWarning && timeLeft > 0 && !showModal) {
-      console.log('🔔 Session proche de l’expiration, affichage de la modale');
-      setShowModal(true);
+    if (!isAuthenticated) return;
+    if (!isInitialSession && !justLoggedIn) {
+      const updateTimeLeft = () => {
+        const remaining = getTokenRemainingTime();
+        setTimeLeft(remaining > 0 ? remaining : 0);
+      };
+      updateTimeLeft();
+      const interval = setInterval(updateTimeLeft, 1000);
+      return () => clearInterval(interval);
     }
-  }, [timeLeft, showModal]);
+  }, [isInitialSession, justLoggedIn, isAuthenticated]);
 
+  const switchToRealToken = () => {
+    setIsInitialSession(false);
+    setJustLoggedIn(false);
+  };
+
+  return (
+    <SessionContext.Provider
+      value={{ timeLeft, setTimeLeft, switchToRealToken, isInitialSession, justLoggedIn }}
+    >
+      {children}
+    </SessionContext.Provider>
+  );
+};
+
+const SessionManager = () => {
+  const dispatch = useDispatch();
+  const context = useContext(SessionContext);
+  const timeLeft = context?.timeLeft || 0;
+  const setTimeLeft = context?.setTimeLeft || (() => {});
+  const switchToRealToken = context?.switchToRealToken || (() => {});
+  const isInitialSession = context?.isInitialSession ?? true;
+  const justLoggedIn = context?.justLoggedIn ?? false;
+  const [showModal, setShowModal] = useState(false);
+  const [isExtending, setIsExtending] = useState(false);
+  const hasInitialized = useRef(false);
+
+  const VisualTimer = ({ timeLeft, onLogout }) => {
+    let color = '#4caf50'; // vert
+    let iconClass = 'fa-lock-open';
+    if (timeLeft <= 20 && timeLeft > 5) {
+      color = '#ff9800'; // orange
+    } else if (timeLeft <= 5) {
+      color = '#f44336'; // rouge
+      iconClass = 'fa-lock';
+    }
+    return (
+      <div
+        className="App__header__actions__cadenas"
+        onClick={onLogout}
+      >
+        <i
+          className={`App__header__actions__cadenas__icon fas ${iconClass}`}
+          style={{ color }}
+        />
+        <span
+          className="App__header__actions__cadenas__timer"
+          style={{ color }}
+        >
+          {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+        </span>
+      </div>
+    );
+  };
+
+  const handleLogout = useCallback(() => {
+    dispatch({ type: 'LOGOUT' });
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('sessionJustLoggedIn');
+    window.location.hash = 'auth';
+    window.location.reload();
+  }, [dispatch]);
 
   const handleExtend = async () => {
-    console.log('🟡 Tentative de prolongation de session...');
     const refreshToken = localStorage.getItem('refreshToken');
-    console.log('🔑 refreshToken récupéré :', refreshToken);
-    if (!refreshToken) {
-      console.warn('❌ Aucun refreshToken trouvé, déconnexion...');
-      return handleLogout();
-    }
+    if (!refreshToken) return handleLogout();
 
     setIsExtending(true);
 
@@ -121,69 +173,86 @@ const SessionManager = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${refreshToken}`
-        }
+          Authorization: `Bearer ${refreshToken}`,
+        },
       });
 
-      console.log('📡 Réponse reçue du backend :', response);
       const data = await response.json();
-      console.log('📦 Contenu JSON reçu :', data);
 
       if (!response.ok || !data.accessToken) {
-        console.warn('❌ Token non reçu ou réponse invalide, déconnexion...');
         return handleLogout();
       }
 
       localStorage.setItem('accessToken', data.accessToken);
-      console.log('✅ Nouveau accessToken stocké :', data.accessToken);
-
       dispatch({ type: 'LOGIN_SUCCESS', payload: data.accessToken });
 
-      const remaining = getTokenRemainingTime();
-      console.log('⏳ Temps restant calculé :', remaining);
+      const remaining = (() => {
+        try {
+          const decoded = jwtDecode(data.accessToken);
+          const now = Math.floor(Date.now() / 1000);
+          return decoded?.exp && typeof decoded.exp === 'number'
+            ? Math.max(0, decoded.exp - now)
+            : 0;
+        } catch {
+          return 0;
+        }
+      })();
 
-      if (!remaining || remaining <= 0) {
-        console.warn('❌ Token prolongé mais déjà expiré, déconnexion...');
-        return handleLogout();
-      }
-
+      switchToRealToken();
       setTimeLeft(remaining);
       setShowModal(false);
-      clearInterval(modalTimerRef.current); // 🛑 Stoppe le timer de la modale
-      modalTimerRef.current = null;
       setIsExtending(false);
-      console.log('🟢 Session prolongée avec succès, modale fermée.');
     } catch (err) {
-      console.error('❌ Erreur lors de la requête de prolongation :', err);
       setIsExtending(false);
       handleLogout();
     }
   };
 
+  useEffect(() => {
+    const sessionJustLoggedIn = sessionStorage.getItem('sessionJustLoggedIn') === '1';
+    const hash = window.location.hash.slice(1);
+    const isAuthPage = hash === 'auth';
+    if (sessionJustLoggedIn && !hasInitialized.current && !isAuthPage) {
+      hasInitialized.current = true;
+      setShowModal(true);
+      sessionStorage.removeItem('sessionJustLoggedIn');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
+  }, []);
+
+  useEffect(() => {
+    if (showModal && timeLeft <= 0) return handleLogout();
+  }, [showModal, timeLeft, handleLogout]);
+
+  useEffect(() => {
+    if (!showModal && !isInitialSession && !justLoggedIn && timeLeft <= 0) {
+      handleLogout();
+    }
+  }, [showModal, isInitialSession, justLoggedIn, timeLeft, handleLogout]);
 
   return (
     <>
-      {timeLeft > 0 && (
-        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>
-          Session expire dans : {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-        </div>
-      )}
+      <VisualTimer timeLeft={timeLeft} onLogout={handleLogout} />
       {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: '30%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          backgroundColor: '#fff',
-          padding: '20px',
-          border: '2px solid #333',
-          zIndex: 1000
-        }}>
-          <p>⏰ Votre session va expirer.</p>
-          <p style={{ fontWeight: 'bold', color: 'red' }}>
-            Déconnexion automatique dans : {modalCountdown} secondes
+        <div
+          style={{
+            position: 'fixed',
+            top: '30%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: '#fff',
+            padding: '20px',
+            border: '2px solid #333',
+            zIndex: 1000,
+          }}
+        >
+          <p>Votre session va expirer.</p>
+          <p key={timeLeft} style={{ fontWeight: 'bold', color: 'red' }}>
+            Déconnexion automatique dans : {Math.max(timeLeft, 0)} secondes
           </p>
-          <button onClick={handleExtend}>Prolonger</button>
+          <button type="button" onClick={handleExtend} disabled={isExtending} data-testid="prolonger-session" aria-label="Prolonger la session">
+            {isExtending ? <Spinner size="small" inline={true} /> : 'Prolonger'}
+          </button>
           <button onClick={handleLogout}>Déconnecter</button>
         </div>
       )}

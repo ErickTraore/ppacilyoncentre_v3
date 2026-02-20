@@ -36,6 +36,48 @@
 
 .presse-form-container {
   margin-top: 20px;
+  max-width: 600px;
+
+  // Formulaire Article (option-1) — même vocabulaire que .presse-select / .presse-reset-button
+  form {
+    input[type="text"],
+    textarea {
+      width: 100%;
+      max-width: 400px;
+      padding: 0.6rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 1.5rem;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+    button[type="submit"] {
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      background-color: #0055aa;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      &:hover:not(:disabled) {
+        background-color: #003f7f;
+      }
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+    p {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+  }
 }
 
 .presse-reset-button {

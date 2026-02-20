@@ -466,9 +466,9 @@ module.exports = {
             user.lastActivity = new Date();
             await user.save();
 
-            // 🆕 Génération d'un nouveau accessToken avec durée de 20 minutes
+            // 🆕 Génération d'un nouveau accessToken (durée = EXPIRE_EXTEND_SESSION, ex. 30m)
             const accessToken = jwtUtils.generateExtendSessionToken(user);
-            console.log('🆕 Nouveau accessToken généré (20 min) :', accessToken);
+            console.log('🆕 Nouveau accessToken généré (prolongation) :', accessToken);
 
             // 📦 Réponse complète
             res.status(200).json({

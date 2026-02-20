@@ -5,6 +5,7 @@ import FormArticle from './FormArticle';
 import FormArticlePhoto from './FormArticlePhoto';
 import FormArticleVideo from './FormArticleVideo';
 import FormArticleThumbnailVideo from './FormArticleThumbnailVideo';
+import FormPresseLocalePhoto from '../presseLocale/FormPresseLocalePhoto';
 import { setResetFormat } from '../../../utils/formatController';
 import './Presse.scss';
 
@@ -16,7 +17,7 @@ const formatDescriptions = {
 };
 
 
-const Presse = () => {
+const Presse = ({ categ = 'presse' }) => {
     const [selectedFormat, setSelectedFormat] = useState('');
 
     const handleReset = () => {
@@ -56,10 +57,10 @@ const Presse = () => {
                     </p>
 
                     <div className="presse-form-container">
-                        {selectedFormat === 'article' && <FormArticle onReset={handleReset} />}
-                        {selectedFormat === 'article-photo' && <FormArticlePhoto onReset={handleReset} />}
-                        {selectedFormat === 'article-video' && <FormArticleVideo onReset={handleReset} />}
-                        {selectedFormat === 'article-thumbnail-video' && <FormArticleThumbnailVideo onReset={handleReset} />}
+                        {selectedFormat === 'article' && <FormArticle onReset={handleReset} categ={categ} />}
+                        {selectedFormat === 'article-photo' && (categ === 'presse-locale' ? <FormPresseLocalePhoto onReset={handleReset} /> : <FormArticlePhoto onReset={handleReset} />)}
+                        {selectedFormat === 'article-video' && <FormArticleVideo onReset={handleReset} categ={categ} />}
+                        {selectedFormat === 'article-thumbnail-video' && <FormArticleThumbnailVideo onReset={handleReset} categ={categ} />}
                     </div>
 
                     <button onClick={handleReset} className="presse-reset-button">

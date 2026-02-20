@@ -13,4 +13,6 @@
 
 # Ignorer tous les fichiers upload
 
-**/media-backend/uploads/
+# Cypress
+frontend/.cypress-cache/
+

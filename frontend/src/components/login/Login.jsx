@@ -26,7 +26,7 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch(`${USER_API}/api/users/login`, {
+      const response = await fetch(`${USER_API}/api/users/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

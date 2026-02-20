@@ -1,0 +1,59 @@
+## File: ppacilyoncentre/docker-compose.yml
+## Stack Hostinger pour ppacilyoncentre (user-backend + mariadb + nginx)
+## Ports distincts de cppeurope pour coexistence sur même Hostinger
+
+services:
+  user-backend:
+    image: node:20
+    working_dir: /usr/src/app
+    volumes:
+      - ./user-backend:/usr/src/app
+    env_file:
+      - ./user-backend/.env.production
+    environment:
+      NODE_ENV: production
+      DB_HOST: mariadb
+      PORT: 7004
+    command: bash -c "node server.docker.js"
+    depends_on:
+      - mariadb
+    restart: always
+    ports:
+      - "7004:7004"
+
+  mariadb:
+    image: mariadb:11
+    restart: always
+    environment:
+      MARIADB_DATABASE: user_production_ppacilyoncentre_v1
+      MARIADB_USER: ppaci
+      MARIADB_PASSWORD: "@Ppacilyoncentre2691"
+      MARIADB_ROOT_PASSWORD: RootPpaci@2025!
+    volumes:
+      - ppacilyoncentre-db-data:/var/lib/mysql
+    ports:
+      - "3311:3306"
+
+  nginx:
+    image: nginx:stable
+    depends_on:
+      - user-backend
+    ports:
+      - "8085:80"
+    volumes:
+      - ./nginx:/etc/nginx/
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./frontend/build:/usr/share/nginx/html
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8086:8080"
+    depends_on:
+      - mariadb
+    environment:
+      ADMINER_DEFAULT_SERVER: mariadb
+
+volumes:
+  ppacilyoncentre-db-data:

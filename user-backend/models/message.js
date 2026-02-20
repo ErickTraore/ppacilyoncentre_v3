@@ -1,33 +1,39 @@
 module.exports = (sequelize, DataTypes) => {
-    const Message = sequelize.define('Message', {
-        tittle: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        content: {
-            type: DataTypes.TEXT('long'),
-            allowNull: false,
-            validate: {
-                len: [1, 50000]
-            }
-        },
-        userId: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        attachment: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        likes: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0
-        }
-    });
+  const Message = sequelize.define('Message', {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    content: {
+      type: DataTypes.TEXT('long'),
+      allowNull: false,
+      validate: {
+        len: [1, 50000],
+      },
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    attachment: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    likes: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    categ: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+      defaultValue: 'presse',
+    },
+  });
 
-    Message.associate = (models) => {
-        Message.belongsTo(models.User, { foreignKey: 'userId' });
-    };
+  Message.associate = (models) => {
+    Message.belongsTo(models.User, { foreignKey: 'userId' });
+  };
 
-    return Message;
+  return Message;
 };
+

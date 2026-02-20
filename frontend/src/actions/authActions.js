@@ -1,7 +1,6 @@
 // src/actions/authActions.js
 
 const USER_API = process.env.REACT_APP_USER_API;
-const MEDIA_API = process.env.REACT_APP_MEDIA_API;
 
 
 export const registerRequest = () => ({

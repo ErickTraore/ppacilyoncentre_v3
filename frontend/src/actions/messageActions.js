@@ -1,14 +1,22 @@
 // File: frontend/src/actions/messageActions.js
 
-import { FETCH_MESSAGES, ADD_MESSAGE, FETCH_MEDIA_FOR_MESSAGES  } from './types';
+import { FETCH_MESSAGES } from './types';
 
 const USER_API = process.env.REACT_APP_USER_API;
+const PRESSE_LOCALE_API = process.env.REACT_APP_PRESSE_LOCALE_API || process.env.REACT_APP_USER_API;
 const MEDIA_API = process.env.REACT_APP_USER_MEDIA;
 
-export const fetchMessages = () => {
+/** Presse générale = user-backend (PresseGle). Presse locale = presseLocale-backend (PresseLocale). */
+export const fetchMessages = (categ) => {
   return async dispatch => {
+    const key = categ === 'presse-locale' ? 'presse-locale' : 'presse';
+    const baseUrl = key === 'presse-locale' ? PRESSE_LOCALE_API : USER_API;
+    const siteKey = process.env.REACT_APP_PRESSE_LOCALE_SITE_KEY || 'ppacilyoncentre';
+    const url = key === 'presse-locale'
+      ? `${baseUrl}/messages/?categ=presse-locale&siteKey=${encodeURIComponent(siteKey)}`
+      : `${baseUrl}/api/users/messages/`;
     try {
-      const response = await fetch(`${USER_API}/api/users/messages/`, {
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
@@ -16,9 +24,10 @@ export const fetchMessages = () => {
         }
       });
       const data = await response.json();
-      dispatch({ type: FETCH_MESSAGES, payload: data });
+      dispatch({ type: FETCH_MESSAGES, payload: { categ: key, messages: Array.isArray(data) ? data : [] } });
     } catch (error) {
       console.error('Erreur lors de la récupération des messages', error);
+      dispatch({ type: FETCH_MESSAGES, payload: { categ: key, messages: [] } });
     }
   };
 };
@@ -41,9 +50,8 @@ export const fetchMediaForMessages = (messageIds) => async (dispatch) => {
 export const addMessage = (formData) => {
   return async dispatch => {
     try {
-      // Envoyer le titre et le contenu au backend "user--backend"
       const messageData = {
-        tittle: formData.get('tittle'),
+        title: formData.get('title'),
         content: formData.get('content'),
       };
 
@@ -56,7 +64,6 @@ export const addMessage = (formData) => {
         body: JSON.stringify(messageData),
       });
 
-      // Uploader les fichiers image et vidéo au backend "MEDIA-BACKEND"
       const mediaFormData = new FormData();
       if (formData.get('image')) {
         mediaFormData.append('image', formData.get('image'));
@@ -75,7 +82,6 @@ export const addMessage = (formData) => {
         });
       }
 
-      // Après l'ajout d'un nouveau message, mettre à jour la liste des messages
       dispatch(fetchMessages());
     } catch (error) {
       console.error('Erreur lors de l\'ajout du message', error);

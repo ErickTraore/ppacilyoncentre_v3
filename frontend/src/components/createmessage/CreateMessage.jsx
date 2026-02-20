@@ -9,7 +9,7 @@ const MEDIA_API = process.env.REACT_APP_MEDIA_API;
 
 const CreateMessage = () => {
   const [newMessage, setNewMessage] = useState({
-    tittle: '',
+    title: '',
     content: '',
     image: null,
     video: null,
@@ -52,7 +52,7 @@ const CreateMessage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!newMessage.tittle || !newMessage.content) {
+    if (!newMessage.title || !newMessage.content) {
       setErrorMessage('⚠️ Un titre et un contenu sont obligatoires.');
       return;
     }
@@ -65,7 +65,7 @@ const CreateMessage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          tittle: newMessage.tittle,
+          title: newMessage.title,
           content: newMessage.content,
         }),
       });
@@ -75,7 +75,7 @@ const CreateMessage = () => {
       if (newMessage.image) await uploadFile(newMessage.image, 'image', newMessageId);
       if (newMessage.video) await uploadFile(newMessage.video, 'video', newMessageId);
 
-      setNewMessage({ tittle: '', content: '', image: null, video: null });
+      setNewMessage({ title: '', content: '', image: null, video: null });
       document.querySelector("input[name='image']").value = "";
       document.querySelector("input[name='video']").value = "";
       setErrorMessage('');
@@ -89,8 +89,8 @@ const CreateMessage = () => {
     <form onSubmit={handleSubmit} encType="multipart/form-data">
       <input
         type="text"
-        name="tittle"
-        value={newMessage.tittle}
+        name="title"
+        value={newMessage.title}
         onChange={handleInputChange}
         placeholder="Titre"
         required

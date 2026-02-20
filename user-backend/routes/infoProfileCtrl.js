@@ -1,23 +1,30 @@
 // File: user-backend/routes/infoProfileCtrl.js
 
-const { Profile } = require('../models');
+const { Profile, User } = require('../models');
 
-// 🔍 Lire un profil par ID
+// 🔍 Lire un profil par ID (création auto si absent)
 exports.getInfoProfile = async (req, res) => {
-  
   try {
-    const userId = req.userId; // ✅ cohérent avec middleware
-    console.log('🔍 userId reçu dans getInfoProfile:', userId);
+    const userId = req.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Token invalide ou userId absent' });
     }
-    const profile = await Profile.findOne({ where: { userId } });
+    let profile = await Profile.findOne({ where: { userId } });
 
-  if (!profile) {
-      // ✅ informer explicitement l’utilisateur
-      return res.status(404).json({
-        message: `Aucun profil trouvé pour l’utilisateur ${userId}.`,
-        suggestion: 'Veuillez créer votre profil avant de le consulter.'
+    if (!profile) {
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'Utilisateur introuvable.' });
+      }
+      profile = await Profile.create({
+        userId,
+        email: user.email || `user-${userId}@ppacilyoncentre.com`,
+        firstName: '',
+        lastName: '',
+        phone1: '',
+        phone2: '',
+        phone3: '',
+        address: ''
       });
     }
 
